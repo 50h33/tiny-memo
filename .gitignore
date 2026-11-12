@@ -1,0 +1,16 @@
+.gradle/
+build/
+data/
+*.log
+.idea/
+*.iml
+.vscode/
+
+# dev-cycle runtime artifacts
+/.dev-cycle/
+
+# Claude Code personal configuration and runtime data
+.claude/settings.local.json
+.claude/claude-progress.txt
+.claude/feature_list.json
+.claude/logs/

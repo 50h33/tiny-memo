@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "repository": "50h33/tiny-memo",
+  "defaultBranch": "main",
+  "baseRef": "main",
+  "paths": {
+    "conventions": "AGENTS.md",
+    "issueTemplates": ".github/ISSUE_TEMPLATE",
+    "prTemplate": ".github/pull_request_template.md"
+  },
+  "commands": {
+    "test": {
+      "executable": "./gradlew",
+      "args": [
+        "test",
+        "--console=plain",
+        "--no-daemon",
+        "--rerun-tasks"
+      ],
+      "windows": {
+        "executable": "./gradlew.bat",
+        "args": [
+          "test",
+          "--console=plain",
+          "--no-daemon",
+          "--rerun-tasks"
+        ]
+      }
+    }
+  },
+  "test": {
+    "commonModules": [
+      "memo-core"
+    ],
+    "fullTestPaths": [
+      "settings.gradle",
+      "build.gradle",
+      "gradle.properties",
+      "gradlew",
+      "gradlew.bat",
+      "gradle/",
+      "buildSrc/"
+    ],
+    "documentationPaths": [
+      "docs/",
+      "README.md"
+    ]
+  },
+  "artifactsDir": ".dev-cycle"
+}

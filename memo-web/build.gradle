@@ -1,0 +1,15 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':memo-core')
+}
+
+application {
+    mainClass = 'tiny.memo.web.MemoApplication'
+}
+
+tasks.named('run') {
+    workingDir = rootProject.projectDir
+}

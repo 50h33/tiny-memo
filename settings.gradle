@@ -1,0 +1,2 @@
+rootProject.name = 'tiny-memo'
+include 'memo-core', 'memo-web'
