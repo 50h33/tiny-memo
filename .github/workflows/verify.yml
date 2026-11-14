@@ -1,0 +1,64 @@
+name: Verify memo on three operating systems
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: tiny-memo
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: tiny-memo
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: 50h33/dev-cycle
+          ref: f6e1e1232976c9bd6f8cda6dd09862fd18aa7a2b
+          path: dev-cycle
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22.17.0'
+      - name: Verify comparison ref and runtime
+        run: |
+          git show-ref --verify --quiet refs/heads/main || git branch main origin/main
+          git rev-parse HEAD main
+          java -version
+          node --version
+          npm --version
+      - name: Build dev-cycle from the pinned source
+        working-directory: dev-cycle
+        run: |
+          npm ci
+          npm run build
+      - name: Run actual tests and validate report evidence
+        run: node scripts/verify-dev-cycle.cjs ../dev-cycle/dist/cli.js
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: test-evidence-${{ matrix.os }}
+          path: tiny-memo/.dev-cycle/
+          include-hidden-files: true
+          if-no-files-found: warn

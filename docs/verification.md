@@ -47,8 +47,8 @@ core 4개와 web 5개, 총 9개가 실패 0, 오류 0, 생략 0이었다. 컴파
 2026-11-15 한국 시간의 Edge 재실행에서는 PID `15932`와 `12372`, 포트 `52574`로 6개 시나리오가
 다시 통과했다. Chrome은 재개 후 자동화 시작 직후 종료돼 그 재실행을 실패로 구분하고 Edge를 사용했다.
 페이지 JavaScript 오류는 없었다. 1100px 데스크톱 및 390px 모바일 크기의 스크린샷을 확인했고
-모바일 가로 넘침도 없었다. `.dev-cycle/browser/result.json`, `after-restart.png`, `mobile.png`는
-Git에서 제외되는 로컬 증거다. 재실행하면 이 파일들은 최신 결과로 교체된다.
+모바일 가로 넘침도 없었다. 당시 `.dev-cycle/browser/result.json`, `after-restart.png`, `mobile.png`는
+Git에서 제외되는 로컬 증거다. 이후 추가 검증부터는 실행별 고유 디렉터리를 사용해 이전 증거도 보존한다.
 
 연결된 브라우저 도구가 응답하지 않아 외부 디렉터리에 Playwright를 준비하고 설치된 Chrome으로
 검증했다. 재개 후에는 같은 Playwright로 설치된 Edge도 검증했다.
@@ -96,10 +96,11 @@ Host 검증을 추가하자는 Should 1건을 반영했다. 외부 도메인 Hos
 잘못된 Playwright 경로로 종료 코드 1을 유도해 이전 성공 증거 세 파일이 남지 않는지 확인했다.
 그 뒤 정상 경로와 Edge 채널로 실행해 새 성공 증거를 만들었다.
 
-Windows와 설치된 Chrome 및 Edge에서 로컬 검증을 수행했다. Linux, macOS, Firefox, Safari, 원격 CI는
-검증하지 않았다. 디스크 오류의 HTTP 처리 테스트는 있지만 저장 도중 강제 종료, 전원 장애,
-디스크 가득 참에 대한 내구성 검증은 하지 않았다. 직접 파일 덮어쓰기는 원자성을 보장하지 않으며,
-여러 클라이언트가 저장하면 마지막 요청이 이전 내용을 덮어쓴다.
+첫 완료 시점에는 Windows와 Chrome 및 Edge를 검증했다. 사용자의 추가 요청으로
+Linux, Firefox, WebKit 엔진, 강제 종료와 ENOSPC 오류를 확인한 결과는
+[추가 검증 기록](additional-verification.md)에 구분해 남겼다. macOS, 실제 Safari와 원격 CI는
+실행 환경 또는 원격 push 승인 없이는 통과했다고 표시하지 않는다. 직접 파일 덮어쓰기는 원자성을
+보장하지 않으며, 실제 강제 종료 시험에서 불완전한 파일이 남았다.
 
 로그인, 목록, 검색, 삭제 API, DB, 배포는 구현 범위 밖이다. 원격 push, PR 게시와 배포는
 수행하지 않았다. **dev-cycle 이슈 #13 전체 검증 또는 Claude Code 에이전트 검증을 완료한 사례가 아니다.**

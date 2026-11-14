@@ -43,7 +43,7 @@ Java 컴파일 시 `-Xlint:all -Werror`를 적용한다. JUnit 테스트 9개는
 `build/test-results/test/*.xml`에 생성된다. 기본 구성 단계의 `NO-SOURCE`는 테스트 통과로 집계하지 않는다.
 
 별도 브라우저 검증은 저장, 새로고침과 실제 Java 프로세스 재시작을 포함한다.
-Node.js와 설치된 Chrome 또는 Edge, 외부 Playwright 패키지가 필요하다. 이 환경에서는 다음 명령으로 재현한다.
+Node.js와 브라우저, 외부 Playwright 패키지가 필요하다. 이 환경에서는 다음 명령으로 재현한다.
 Playwright는 앱의 런타임 의존성이 아니다.
 
 ```powershell
@@ -51,9 +51,20 @@ npm install --prefix "C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check" --no
 node memo-web/src/test/browser/smoke.cjs "C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check\node_modules\playwright" msedge
 ```
 
-마지막 인자는 브라우저 채널이며 `msedge`는 Edge, 생략하거나 `chrome`이면 Chrome을 사용한다.
+마지막 인자는 `chrome`, `msedge`, `firefox`, `webkit`이다. 생략하면 Chrome을 사용한다.
+Firefox와 WebKit 엔진은 다음처럼 저장소 밖에 설치하고 실행한다.
+
+```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = 'C:\Users\wneh2\Desktop\tiny-memo-tools\playwright-browsers-1.65.0'
+node 'C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check\node_modules\playwright\cli.js' install firefox webkit
+node memo-web/src/test/browser/smoke.cjs 'C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check\node_modules\playwright' firefox
+node memo-web/src/test/browser/smoke.cjs 'C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check\node_modules\playwright' webkit
+```
+
+Windows의 Playwright WebKit 결과는 실제 Safari나 macOS 검증을 뜻하지 않는다.
 이 스크립트는 임시 메모 파일을 만들고 검증 후 서버와 파일을 정리한다. JSON 결과와 데스크톱 및
-모바일 크기의 스크린샷은 `.dev-cycle/browser/`에 남는다. 브라우저 검증은 Gradle test 및 CLI report의
+모바일 크기의 스크린샷은 `.dev-cycle/verification/browser-<대상>/<실행 ID>/`에 남는다.
+실행별 경로를 분리하고 성공 및 실패를 기록한다. 브라우저 검증은 Gradle test 및 CLI report의
 JUnit 개수에 포함되지 않는다. 다른 컴퓨터에서는 위 외부 경로를 실제 위치로 바꾼다.
 
 ## dev-cycle CLI
@@ -75,4 +86,22 @@ node "C:\Users\wneh2\Desktop\tiny-memo-tools\dev-cycle\dist\cli.js" report "C:\U
 에이전트 실행, dev-cycle 이슈 #13 전체 검증을 의미하지 않는다.
 
 [설치 기록](docs/setup.md), [조사와 계획](docs/memo-save-plan.md),
-[검증 기록과 제한](docs/verification.md)에 순서와 근거를 남겼다.
+[검증 기록과 제한](docs/verification.md), [추가 검증 결과](docs/additional-verification.md)에 순서와 근거를 남겼다.
+
+## 추가 검증
+
+`scripts/verify-dev-cycle.cjs`는 위의 CLI 세 명령을 실행하고 실제 테스트, XML 증거 사본과
+report가 일치하는지 검사한다. 준비한 CI도 같은 스크립트를 사용한다.
+
+```powershell
+node scripts/verify-dev-cycle.cjs 'C:\Users\wneh2\Desktop\tiny-memo-tools\dev-cycle\dist\cli.js'
+node scripts/storage-crash-probe.cjs
+```
+
+두 번째 명령은 임시 파일에 64 MiB 저장을 시작한 뒤 해당 Java 프로세스만 강제 종료하는 장애 시험이다.
+종료 코드 1은 관찰된 데이터 손실, 2는 결론을 낼 수 없는 실행이다. 일반 테스트 통과 수에 포함하지 않는다.
+현재 구현에서는 저장 중 강제 종료하면 이전 메모와 새 메모 모두 온전히 남지 않을 수 있음이 실제로 확인됐다.
+
+`.github/workflows/verify.yml`에는 Ubuntu, Windows, macOS의 실제 Gradle 및 dev-cycle 검증을 준비했다.
+로컬 파일 작성과 YAML 검사만으로 원격 CI가 통과했다고 판단하지 않는다. 원격 실행에는 `main`과
+기능 브랜치가 원격 저장소에 있어야 하며, 이전 요청의 push 제외 범위에 따라 아직 게시하지 않았다.
