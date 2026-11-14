@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>작은 메모장</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f5f3ee; color: #252b27; font-family: system-ui, sans-serif; }
+    main { width: min(100% - 40px, 720px); margin: 64px auto; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    p { color: #566159; line-height: 1.6; }
+    label { display: block; margin: 28px 0 10px; font-weight: 600; }
+    textarea { width: 100%; min-height: 320px; padding: 18px; resize: vertical; border: 1px solid #a9b2aa;
+      border-radius: 8px; background: #fffefa; color: inherit; font: inherit; line-height: 1.7; }
+    textarea:focus-visible, button:focus-visible { outline: 3px solid #759d81; outline-offset: 3px; }
+    button { margin-top: 16px; padding: 11px 26px; border: 0; border-radius: 6px;
+      background: #285c3e; color: white; font: inherit; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    #status { min-height: 26px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>작은 메모장</h1>
+  <p>지금 떠오른 생각을 한곳에 적어 두세요.</p>
+  <form id="memo-form">
+    <label for="memo">메모</label>
+    <textarea id="memo" name="memo" placeholder="여기에 메모를 적어 보세요." disabled></textarea>
+    <button id="save" type="submit" disabled>저장</button>
+  </form>
+  <p id="status" role="status" aria-live="polite">메모를 불러오는 중입니다.</p>
+</main>
+<script>
+  const memo = document.querySelector('#memo');
+  const save = document.querySelector('#save');
+  const status = document.querySelector('#status');
+
+  async function loadMemo() {
+    try {
+      const response = await fetch('/api/memo', { cache: 'no-store' });
+      if (!response.ok) throw new Error('load failed');
+      memo.value = await response.text();
+      memo.disabled = false;
+      save.disabled = false;
+      status.textContent = '입력한 뒤 저장 버튼을 눌러 주세요.';
+    } catch {
+      status.textContent = '메모를 불러오지 못했습니다. 서버를 확인하고 새로고침해 주세요.';
+    }
+  }
+
+  document.querySelector('#memo-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const content = memo.value;
+    save.disabled = true;
+    status.textContent = '저장 중입니다.';
+    try {
+      const response = await fetch('/api/memo', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: content
+      });
+      if (!response.ok) throw new Error('save failed');
+      status.textContent = memo.value === content
+        ? '저장했습니다.' : '저장했습니다. 이후 입력한 내용은 다시 저장해 주세요.';
+    } catch {
+      status.textContent = '저장하지 못했습니다. 입력 내용은 그대로 있습니다. 다시 시도해 주세요.';
+    } finally {
+      save.disabled = false;
+    }
+  });
+
+  loadMemo();
+</script>
+</body>
+</html>

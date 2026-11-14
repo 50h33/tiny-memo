@@ -2,21 +2,59 @@
 
 메모 한 개를 UTF-8 로컬 파일에 저장하는 작은 웹 메모장 프로젝트다.
 
-## 기본 구성
+## 실행
+
+Java 21을 설치한 뒤 저장소 루트에서 실행한다. Gradle은 루트 Wrapper로 준비된다.
+
+```powershell
+.\gradlew.bat :memo-web:run
+```
+
+브라우저에서 **http://127.0.0.1:8080** 을 연다. 입력창에 내용을 쓰고 **저장**을 누르면
+저장소 루트의 `data/memo.txt` 한 파일을 UTF-8로 덮어쓴다. 저장 파일이 없으면 빈 입력창이
+표시되고, 저장한 내용은 새로고침하거나 서버를 종료한 뒤 같은 명령으로 다시 실행해도 유지된다.
+빈 내용도 저장할 수 있다. 입력만 하고 저장하지 않은 내용은 유지되지 않는다.
+
+종료는 터미널에서 `Ctrl+C`를 누른다. 포트와 저장 파일은 필요할 때 지정할 수 있다.
+
+```powershell
+.\gradlew.bat :memo-web:run --args="8081 data/other-memo.txt"
+```
+
+상대 파일 경로는 Gradle run 명령에서 저장소 루트를 기준으로 한다. 서버는 `127.0.0.1`에만
+바인딩한다. 로그인, 메모 목록, 검색, 별도 삭제 기능, DB와 배포는 포함하지 않는다.
+
+## 구성과 테스트
 
 - Java 21, Gradle Wrapper 9.3.0, Groovy DSL
 - `memo-core`: 메모 저장 로직 모듈
 - `memo-web`: core에 의존하는 HTTP 및 화면 모듈
 - JUnit 6.0.3, 표준 `test` 태스크와 기본 XML 결과 경로
 
-초기 기준 커밋은 모듈 구성과 dev-cycle 설치만 포함한다. 메모 기능과 테스트는 기능 브랜치에서 구현한다.
+초기 `main` 기준 커밋 `ab69c01`은 모듈 구성과 dev-cycle 설치만 포함한다.
+메모 기능은 그 커밋에서 만든 `feature/memo-save` 브랜치에서 구현했다.
 
 ```powershell
-.\gradlew.bat build
+.\gradlew.bat build --no-daemon --rerun-tasks
 ```
 
-기본 구성 단계의 `NO-SOURCE`는 기능 테스트 통과가 아니다. 기능 구현 후 실행 명령은
-`.\gradlew.bat :memo-web:run`이며 브라우저 주소와 저장 위치를 이 문서에 추가한다.
+Java 컴파일 시 `-Xlint:all -Werror`를 적용한다. JUnit 테스트 9개는 임시 디렉터리의 실제
+파일과 loopback HTTP를 사용하며, 사용자 메모를 건드리지 않는다. 결과는 각 모듈의
+`build/test-results/test/*.xml`에 생성된다. 기본 구성 단계의 `NO-SOURCE`는 테스트 통과로 집계하지 않는다.
+
+별도 브라우저 검증은 저장, 새로고침과 실제 Java 프로세스 재시작을 포함한다.
+Node.js와 설치된 Chrome 또는 Edge, 외부 Playwright 패키지가 필요하다. 이 환경에서는 다음 명령으로 재현한다.
+Playwright는 앱의 런타임 의존성이 아니다.
+
+```powershell
+npm install --prefix "C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check" --no-audit --no-fund playwright@1.65.0
+node memo-web/src/test/browser/smoke.cjs "C:\Users\wneh2\Desktop\tiny-memo-tools\browser-check\node_modules\playwright" msedge
+```
+
+마지막 인자는 브라우저 채널이며 `msedge`는 Edge, 생략하거나 `chrome`이면 Chrome을 사용한다.
+이 스크립트는 임시 메모 파일을 만들고 검증 후 서버와 파일을 정리한다. JSON 결과와 데스크톱 및
+모바일 크기의 스크린샷은 `.dev-cycle/browser/`에 남는다. 브라우저 검증은 Gradle test 및 CLI report의
+JUnit 개수에 포함되지 않는다. 다른 컴퓨터에서는 위 외부 경로를 실제 위치로 바꾼다.
 
 ## dev-cycle CLI
 
@@ -35,3 +73,6 @@ node "C:\Users\wneh2\Desktop\tiny-memo-tools\dev-cycle\dist\cli.js" report "C:\U
 
 이 저장소의 작업은 **Codex에서 dev-cycle CLI를 적용한 사례**다. Claude Code 전용 명령이나
 에이전트 실행, dev-cycle 이슈 #13 전체 검증을 의미하지 않는다.
+
+[설치 기록](docs/setup.md), [조사와 계획](docs/memo-save-plan.md),
+[검증 기록과 제한](docs/verification.md)에 순서와 근거를 남겼다.
