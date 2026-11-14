@@ -98,9 +98,9 @@ Host 검증을 추가하자는 Should 1건을 반영했다. 외부 도메인 Hos
 
 첫 완료 시점에는 Windows와 Chrome 및 Edge를 검증했다. 사용자의 추가 요청으로
 Linux, Firefox, WebKit 엔진, 강제 종료와 ENOSPC 오류를 확인한 결과는
-[추가 검증 기록](additional-verification.md)에 구분해 남겼다. macOS, 실제 Safari와 원격 CI는
-실행 환경 또는 원격 push 승인 없이는 통과했다고 표시하지 않는다. 직접 파일 덮어쓰기는 원자성을
+[추가 검증 기록](additional-verification.md)에 구분해 남겼다. 이후 사용자의 push 승인으로
+Windows, Ubuntu와 macOS의 원격 CI도 실제 통과했다. 실제 Safari와 전원 차단은 미검증이다. 직접 파일 덮어쓰기는 원자성을
 보장하지 않으며, 실제 강제 종료 시험에서 불완전한 파일이 남았다.
 
-로그인, 목록, 검색, 삭제 API, DB, 배포는 구현 범위 밖이다. 원격 push, PR 게시와 배포는
-수행하지 않았다. **dev-cycle 이슈 #13 전체 검증 또는 Claude Code 에이전트 검증을 완료한 사례가 아니다.**
+로그인, 목록, 검색, 삭제 API, DB, 배포는 구현 범위 밖이다. 원격 push는 후속 승인에 따라
+수행했고 PR 게시와 배포는 하지 않았다. **dev-cycle 이슈 #13 전체 검증 또는 Claude Code 에이전트 검증을 완료한 사례가 아니다.**

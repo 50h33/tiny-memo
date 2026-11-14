@@ -6,7 +6,7 @@
 - 기존 변경을 보존하고 조사, 계획, 구현, 테스트, 리뷰 순서로 작업한다.
 - 초기 기본 구성과 dev-cycle 설치만 `main`에 커밋한다. 기능은 `main`에서 만든 `feature/memo-save`에서 개발한다.
 - 커밋 메시지는 `Chore:`, `Feat:`, `Fix:`, `Docs:` 중 해당 접두사를 쓴다.
-- 명확한 로컬 변경과 커밋은 진행한다. 원격 push, 이슈나 PR 게시, 배포는 이번 작업 범위 밖이다.
+- 명확한 로컬 변경과 커밋은 진행한다. 원격 push는 사용자가 승인한 브랜치와 범위에서 수행한다. 이슈나 PR 게시와 배포는 이번 작업 범위 밖이다.
 - `./gradlew.bat build`로 컴파일 경고 검사와 테스트를 실행한다. Unix에서는 `./gradlew`를 사용한다.
 - 표준 `test` 태스크와 기본 `build/test-results/test/*.xml` 경로를 유지한다. 테스트는 임시 디렉터리의 실제 파일을 사용한다.
 - dev-cycle 명령과 실제 CLI 경로는 `README.md`를 따른다. 최종 커밋 후 CLI test와 report를 다시 실행한다.

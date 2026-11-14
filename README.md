@@ -102,6 +102,8 @@ node scripts/storage-crash-probe.cjs
 종료 코드 1은 관찰된 데이터 손실, 2는 결론을 낼 수 없는 실행이다. 일반 테스트 통과 수에 포함하지 않는다.
 현재 구현에서는 저장 중 강제 종료하면 이전 메모와 새 메모 모두 온전히 남지 않을 수 있음이 실제로 확인됐다.
 
-`.github/workflows/verify.yml`에는 Ubuntu, Windows, macOS의 실제 Gradle 및 dev-cycle 검증을 준비했다.
-로컬 파일 작성과 YAML 검사만으로 원격 CI가 통과했다고 판단하지 않는다. 원격 실행에는 `main`과
-기능 브랜치가 원격 저장소에 있어야 하며, 이전 요청의 push 제외 범위에 따라 아직 게시하지 않았다.
+`.github/workflows/verify.yml`은 Ubuntu, Windows, macOS에서 실제 Gradle 및 dev-cycle을 검증한다.
+사용자의 후속 push 승인으로 `main`과 `feature/memo-save`를 게시했고,
+[첫 원격 CI](https://github.com/50h33/tiny-memo/actions/runs/43628868487)에서 세 OS가 각각
+테스트 9개, 실패 0개와 report `current`를 확인했다. 새 커밋의 상태는 해당 HEAD의 Actions 결과를 확인한다.
+macOS의 Java 및 HTTP 테스트 통과는 실제 Safari 검증을 뜻하지 않는다.

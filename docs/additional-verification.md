@@ -14,8 +14,9 @@
 | 공간 부족 오류 응답 | 통과 | Linux `/dev/full`에 유한한 PUT, 실제 ENOSPC 쓰기 실패를 HTTP 500으로 반환 |
 | 저장 중 프로세스 강제 종료 | 내구성 실패 확인 | 기존 파일이 사라지고 새 내용의 일부만 남음 |
 | 실제 전원 차단 | 미검증 | 호스트 전원을 끄거나 사용자 VM을 종료하지 않음. 프로세스 종료와 다른 시험 |
-| macOS, 실제 Safari | 미검증 | 연결된 Apple 실행 환경 없음 |
-| 원격 GitHub Actions | 미실행 | 원격 브랜치와 workflow 0개. 앞선 원격 push 제외 지시 유지 |
+| macOS | 통과 | GitHub hosted macOS 26.7.2 ARM64에서 실제 Java 및 HTTP 테스트 9개 |
+| 실제 Safari | 미검증 | Windows WebKit 엔진과 macOS Java 테스트로 대체하지 않음 |
+| 원격 GitHub Actions | 통과 | 후속 push 승인 후 Windows, Ubuntu, macOS에서 각각 테스트 9개와 report 검증 |
 
 ## Linux 실행
 
@@ -77,18 +78,31 @@ Linux에서는 서버의 저장 파일 경로를 `/dev/full`로 지정해 유한
 확인했고 서버는 계속 살아 있었다. 증거는 Linux 기록의 `dev-full-result.txt`와 `dev-full-body.txt`다.
 이것은 커널의 실제 ENOSPC 오류 처리 검증이며 실제 사용자 디스크를 가득 채우거나 기존 파일 보존을 검증한 결과는 아니다.
 
-## 원격 CI 준비와 남은 승인
+## 원격 CI 실제 실행
 
 `.github/workflows/verify.yml`은 Ubuntu, Windows, macOS 매트릭스와 Java 21, Node 22.17.0,
 고정된 dev-cycle 소스를 준비한다. 각 OS에서 같은 실제 CLI 검증 스크립트를 실행하고 증거를 보관한다.
 Actions 버전은 GitHub에서 확인한 commit SHA로 고정했으며 권한은 `contents: read`다.
-YAML 파싱과 매트릭스 및 권한 설정을 로컬에서 확인했다. 원격 실행 성공을 뜻하지 않는다.
+YAML 파싱과 매트릭스 및 권한을 로컬에서 확인한 후 사용자의 명시적인 push 승인을 받았다.
 
-원격에는 `main`도 기능 브랜치도 없고 Actions workflow도 0개다.
-[GitHub Actions 문서](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows)에 따라
-원격 ref에 workflow가 있어야 실제 실행이 가능하다. 준비한 변경의 실행에는
-`git push origin main feature/memo-save`가 필요하지만, 앞선 사용자 요청에서 push가 제외돼 있어 수행하지 않았다.
-PR 게시나 배포는 필요하지 않다. macOS의 Java 테스트가 통과해도 실제 Safari 검증과는 별개다.
+2026-11-15 한국 시간에 `git push --atomic -u origin main feature/memo-save`로 두 브랜치를 게시했다.
+`main`은 초기 기준 `ab69c01`, 기능 브랜치는 `f90b91d`였고
+[Actions run 43628868487](https://github.com/50h33/tiny-memo/actions/runs/43628868487)이 성공했다.
+
+| 원격 실행 환경 | dev-cycle run ID | 테스트 | 실패/오류/생략 | freshness |
+| --- | --- | ---: | --- | --- |
+| Windows Server 2025, 10.0.26100 | `99761514-b2af-46f6-904a-0bdb689e1406` | 9 | 0/0/0 | current |
+| Ubuntu 26.04.1 LTS | `1fd3a123-af4e-4f51-9f84-9a2acf82a066` | 9 | 0/0/0 | current |
+| macOS 26.7.2 ARM64 | `cc225af0-a76d-4deb-aa7a-9135badea32c` | 9 | 0/0/0 | current |
+
+각 job에서 dev-cycle을 소스 빌드한 뒤 실제 Gradle을 실행했다. 두 모듈의 test가 `EXECUTED`,
+이번 실행 XML 2개가 `fresh`, 프로세스 종료 코드가 0이었다. 원격 아티팩트를 내려받아 XML의
+테스트 수와 실패 수를 report와 다시 대조했다. 비교 ref는 세 환경 모두 실제 `main`이었다.
+로컬 증거는 `.dev-cycle/verification/remote-43628868487/`의 각 OS 폴더와 `validated-summary.json`이다.
+
+이 표는 `f90b91d10f38ee0cc1003a3465a7174aeb26717a`의 실행 결과다. 이 기록을 포함하는 후속 커밋도
+로컬 test와 report를 실행한 뒤 push하고 해당 HEAD의 원격 CI를 확인한다. PR 게시와 배포는 수행하지 않는다.
+macOS의 Java 및 HTTP 테스트 통과는 실제 Safari 검증과 별개다. 저장 중 강제 종료 내구성 실패도 그대로 남아 있다.
 
 이번 기록도 **Codex에서 dev-cycle CLI를 적용한 사례**다. Claude Code 에이전트 실행과
 dev-cycle 이슈 #13 전체 검증으로 표현하지 않는다.
